@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="
+      default-src 'self';
+      base-uri 'none';
+      object-src 'none';
+      frame-ancestors 'none';
+      form-action 'self';
+      script-src 'self';
+      style-src 'self';
+      font-src 'self';
+      img-src 'self' data:;
+      connect-src 'self' https://*.cognitiveservices.azure.com https://*.openai.azure.com https://*.azurewebsites.net;
+      upgrade-insecure-requests
+    "
+  >
+  <meta name="referrer" content="no-referrer">
+  <title>Chatbot Azure AI Foundry</title>
+  <meta
+    name="description"
+    content="Interface estática para conversar com um agente já criado no Azure AI Foundry."
+  >
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="config-panel">
+      <div class="panel-card">
+        <div class="eyebrow">Azure AI Foundry</div>
+        <h1>Chatbot com agente existente</h1>
+        <p class="panel-intro">
+          Ajuste o comportamento do agente e configure a conexão antes de iniciar a conversa.
+        </p>
+
+        <section class="config-section">
+          <div class="section-heading">
+            <h2>Conexão</h2>
+            <span class="status-badge" id="connectionStatus">Não configurado</span>
+          </div>
+
+          <label class="field">
+            <span>Modo de conexão</span>
+            <select id="connectionMode">
+              <option value="proxy" selected>Proxy seguro / backend</option>
+              <option value="direct">Frontend direto (somente teste)</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Proxy URL</span>
+            <input
+              id="proxyUrl"
+              type="url"
+              placeholder="https://seu-proxy.azurewebsites.net/api/chat"
+              inputmode="url"
+              spellcheck="false"
+              autocomplete="off"
+              maxlength="2048"
+            >
+          </label>
+
+          <label class="field">
+            <span>Azure Endpoint</span>
+            <input
+              id="azureEndpoint"
+              type="url"
+              placeholder="https://seu-recurso.cognitiveservices.azure.com/"
+              inputmode="url"
+              spellcheck="false"
+              autocomplete="off"
+              maxlength="2048"
+            >
+          </label>
+
+          <label class="field">
+            <span>Deployment</span>
+            <input
+              id="deploymentName"
+              type="text"
+              placeholder="gpt-4.1-mini"
+              autocomplete="off"
+              maxlength="120"
+              spellcheck="false"
+            >
+          </label>
+
+          <label class="field">
+            <span>API Key</span>
+            <input
+              id="apiKey"
+              type="password"
+              placeholder="Use apenas em protótipo local"
+              autocomplete="new-password"
+              spellcheck="false"
+              maxlength="512"
+            >
+          </label>
+
+          <p class="hint warning">
+            Hospedar chave no frontend é inseguro. Para GitHub Pages, prefira proxy seguro.
+          </p>
+
+          <p class="hint warning hidden" id="directModeWarning">
+            O modo direto fica bloqueado fora de `localhost`, `127.0.0.1` ou `file://`.
+          </p>
+
+          <p class="hint">
+            `agent_id` não faz parte da API de Chat Completions do Azure OpenAI. Ele só aparece
+            em APIs de Agents/Assistants.
+          </p>
+        </section>
+
+        <section class="config-section">
+          <div class="section-heading">
+            <h2>Configuração do Agente</h2>
+            <button class="ghost-button" id="resetAgentConfig" type="button">Restaurar</button>
+          </div>
+
+          <label class="field">
+            <span>Instruções do sistema</span>
+            <textarea
+              id="systemInstructions"
+              rows="4"
+              placeholder="Ex.: Você é um assistente técnico claro, objetivo e preciso."
+              maxlength="4000"
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Tom de resposta</span>
+            <input
+              id="responseTone"
+              type="text"
+              placeholder="Ex.: profissional, didático, direto"
+              maxlength="200"
+            >
+          </label>
+
+          <label class="field">
+            <span>Temperatura</span>
+            <input
+              id="temperature"
+              type="number"
+              min="0"
+              max="2"
+              step="0.1"
+              value="1"
+            >
+          </label>
+
+          <label class="field">
+            <span>Top P</span>
+            <input
+              id="topP"
+              type="number"
+              min="0"
+              max="1"
+              step="0.1"
+              value="1"
+            >
+          </label>
+
+          <label class="field">
+            <span>Máx. tokens de resposta</span>
+            <input
+              id="maxCompletionTokens"
+              type="number"
+              min="1"
+              step="1"
+              value="1024"
+            >
+          </label>
+
+          <label class="field">
+            <span>Objetivo principal</span>
+            <textarea
+              id="mainGoal"
+              rows="3"
+              placeholder="Ex.: ajudar usuários a tirar dúvidas sobre processos internos"
+              maxlength="2000"
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Restrições de comportamento</span>
+            <textarea
+              id="behaviorRestrictions"
+              rows="3"
+              placeholder="Ex.: não inventar dados, pedir contexto quando houver ambiguidade"
+              maxlength="2000"
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Contexto adicional</span>
+            <textarea
+              id="additionalContext"
+              rows="4"
+              placeholder="Ex.: público-alvo, regras de negócio, glossário, links internos"
+              maxlength="4000"
+            ></textarea>
+          </label>
+
+          <details class="note-block">
+            <summary>Instruções dinâmicas x fine-tuning</summary>
+            <p>
+              Esta tela ajusta prompt e comportamento em tempo de execução. Isso não equivale,
+              por si só, a fine-tuning real do modelo.
+            </p>
+          </details>
+        </section>
+      </div>
+    </aside>
+
+    <main class="chat-panel">
+      <section class="hero-card">
+        <div>
+          <div class="eyebrow">Página estática para GitHub Pages</div>
+          <h2>Converse com seu agente do Azure AI Foundry</h2>
+          <p>
+            A interface envia histórico, mensagem atual e instruções dinâmicas junto da chamada
+            `chat/completions`, no formato compatível com Azure OpenAI.
+          </p>
+        </div>
+        <div class="hero-meta">
+          <div class="meta-chip">HTML + CSS + JS puro</div>
+          <div class="meta-chip">Sem framework</div>
+          <div class="meta-chip">Pronto para deploy estático</div>
+        </div>
+      </section>
+
+      <section class="chat-card">
+        <div class="chat-toolbar">
+          <div>
+            <h2>Conversa</h2>
+            <p class="chat-subtitle">Histórico mantido no navegador durante a sessão.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="ghost-button" id="newConversation" type="button">Nova conversa</button>
+            <button class="ghost-button" id="exportConversation" type="button">Exportar JSON</button>
+          </div>
+        </div>
+
+        <div id="errorBanner" class="error-banner hidden" role="alert"></div>
+
+        <div id="chatHistory" class="chat-history" aria-live="polite">
+          <article class="message assistant">
+            <div class="message-role">Agente</div>
+            <div class="message-bubble">
+              Configure a conexão, ajuste as instruções e envie sua primeira pergunta.
+            </div>
+          </article>
+        </div>
+
+        <div id="loadingIndicator" class="loading-indicator hidden" aria-live="assertive">
+          <span class="loader-dot"></span>
+          <span class="loader-dot"></span>
+          <span class="loader-dot"></span>
+          <span>O agente está processando sua mensagem...</span>
+        </div>
+
+        <form id="chatForm" class="composer" autocomplete="off">
+          <label class="sr-only" for="userMessage">Digite sua mensagem</label>
+          <textarea
+            id="userMessage"
+            rows="3"
+            placeholder="Digite sua pergunta aqui..."
+            required
+            maxlength="4000"
+          ></textarea>
+          <div class="composer-actions">
+            <p class="hint">
+              `Shift + Enter` adiciona linha. `Enter` envia a mensagem.
+            </p>
+            <button id="sendButton" class="primary-button" type="submit">Enviar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <template id="messageTemplate">
+    <article class="message">
+      <div class="message-role"></div>
+      <div class="message-bubble"></div>
+    </article>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
