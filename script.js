@@ -534,7 +534,7 @@ function isHttpsOrLocal(url) {
 }
 
 function isDirectModeAllowed() {
-  return isLocalOrigin(window.location);
+  return isLocalOrigin(globalThis.location);
 }
 
 function isLocalOrigin(target) {
@@ -561,7 +561,7 @@ function sanitizeEndpoint(endpoint) {
 
 function fetchWithTimeout(url, options) {
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), SECURITY_LIMITS.requestTimeoutMs);
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), SECURITY_LIMITS.requestTimeoutMs);
 
   return fetch(url, {
     ...options,
@@ -571,7 +571,7 @@ function fetchWithTimeout(url, options) {
     referrerPolicy: "no-referrer",
     signal: controller.signal
   }).finally(() => {
-    window.clearTimeout(timeoutId);
+    globalThis.clearTimeout(timeoutId);
   });
 }
 

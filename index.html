@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta
-    http-equiv="Content-Security-Policy"
-    content="
+  <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       base-uri 'none';
       object-src 'none';
@@ -17,16 +16,13 @@
       img-src 'self' data:;
       connect-src 'self' https://*.cognitiveservices.azure.com https://*.openai.azure.com https://*.azurewebsites.net;
       upgrade-insecure-requests
-    "
-  >
+    ">
   <meta name="referrer" content="no-referrer">
   <title>Chatbot Azure AI Foundry</title>
-  <meta
-    name="description"
-    content="Interface estática para conversar com um agente já criado no Azure AI Foundry."
-  >
+  <meta name="description" content="Interface estática para conversar com um agente já criado no Azure AI Foundry.">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="page-shell">
     <aside class="config-panel">
@@ -53,52 +49,26 @@
 
           <label class="field">
             <span>Proxy URL</span>
-            <input
-              id="proxyUrl"
-              type="url"
-              placeholder="https://seu-proxy.azurewebsites.net/api/chat"
-              inputmode="url"
-              spellcheck="false"
-              autocomplete="off"
-              maxlength="2048"
-            >
+            <input id="proxyUrl" type="url" placeholder="https://seu-proxy.azurewebsites.net/api/chat" inputmode="url"
+              spellcheck="false" autocomplete="off" maxlength="2048">
           </label>
 
           <label class="field">
             <span>Azure Endpoint</span>
-            <input
-              id="azureEndpoint"
-              type="url"
-              placeholder="https://seu-recurso.cognitiveservices.azure.com/"
-              inputmode="url"
-              spellcheck="false"
-              autocomplete="off"
-              maxlength="2048"
-            >
+            <input id="azureEndpoint" type="url" placeholder="https://seu-recurso.cognitiveservices.azure.com/"
+              inputmode="url" spellcheck="false" autocomplete="off" maxlength="2048">
           </label>
 
           <label class="field">
             <span>Deployment</span>
-            <input
-              id="deploymentName"
-              type="text"
-              placeholder="gpt-4.1-mini"
-              autocomplete="off"
-              maxlength="120"
-              spellcheck="false"
-            >
+            <input id="deploymentName" type="text" placeholder="gpt-4.1-mini" autocomplete="off" maxlength="120"
+              spellcheck="false">
           </label>
 
           <label class="field">
             <span>API Key</span>
-            <input
-              id="apiKey"
-              type="password"
-              placeholder="Use apenas em protótipo local"
-              autocomplete="new-password"
-              spellcheck="false"
-              maxlength="512"
-            >
+            <input id="apiKey" type="password" placeholder="Use apenas em protótipo local" autocomplete="new-password"
+              spellcheck="false" maxlength="512">
           </label>
 
           <p class="hint warning">
@@ -123,87 +93,47 @@
 
           <label class="field">
             <span>Instruções do sistema</span>
-            <textarea
-              id="systemInstructions"
-              rows="4"
-              placeholder="Ex.: Você é um assistente técnico claro, objetivo e preciso."
-              maxlength="4000"
-            ></textarea>
+            <textarea id="systemInstructions" rows="4"
+              placeholder="Ex.: Você é um assistente técnico claro, objetivo e preciso." maxlength="4000"></textarea>
           </label>
 
           <label class="field">
             <span>Tom de resposta</span>
-            <input
-              id="responseTone"
-              type="text"
-              placeholder="Ex.: profissional, didático, direto"
-              maxlength="200"
-            >
+            <input id="responseTone" type="text" placeholder="Ex.: profissional, didático, direto" maxlength="200">
           </label>
 
           <label class="field">
             <span>Temperatura</span>
-            <input
-              id="temperature"
-              type="number"
-              min="0"
-              max="2"
-              step="0.1"
-              value="1"
-            >
+            <input id="temperature" type="number" min="0" max="2" step="0.1" value="1">
           </label>
 
           <label class="field">
             <span>Top P</span>
-            <input
-              id="topP"
-              type="number"
-              min="0"
-              max="1"
-              step="0.1"
-              value="1"
-            >
+            <input id="topP" type="number" min="0" max="1" step="0.1" value="1">
           </label>
 
           <label class="field">
             <span>Máx. tokens de resposta</span>
-            <input
-              id="maxCompletionTokens"
-              type="number"
-              min="1"
-              step="1"
-              value="1024"
-            >
+            <input id="maxCompletionTokens" type="number" min="1" step="1" value="1024">
           </label>
 
           <label class="field">
             <span>Objetivo principal</span>
-            <textarea
-              id="mainGoal"
-              rows="3"
-              placeholder="Ex.: ajudar usuários a tirar dúvidas sobre processos internos"
-              maxlength="2000"
-            ></textarea>
+            <textarea id="mainGoal" rows="3" placeholder="Ex.: ajudar usuários a tirar dúvidas sobre processos internos"
+              maxlength="2000"></textarea>
           </label>
 
           <label class="field">
             <span>Restrições de comportamento</span>
-            <textarea
-              id="behaviorRestrictions"
-              rows="3"
+            <textarea id="behaviorRestrictions" rows="3"
               placeholder="Ex.: não inventar dados, pedir contexto quando houver ambiguidade"
-              maxlength="2000"
-            ></textarea>
+              maxlength="2000"></textarea>
           </label>
 
           <label class="field">
             <span>Contexto adicional</span>
-            <textarea
-              id="additionalContext"
-              rows="4"
-              placeholder="Ex.: público-alvo, regras de negócio, glossário, links internos"
-              maxlength="4000"
-            ></textarea>
+            <textarea id="additionalContext" rows="4"
+              placeholder="Ex.: público-alvo, regras de negócio, glossário, links internos" maxlength="4000"></textarea>
           </label>
 
           <details class="note-block">
@@ -226,11 +156,6 @@
             A interface envia histórico, mensagem atual e instruções dinâmicas junto da chamada
             `chat/completions`, no formato compatível com Azure OpenAI.
           </p>
-        </div>
-        <div class="hero-meta">
-          <div class="meta-chip">HTML + CSS + JS puro</div>
-          <div class="meta-chip">Sem framework</div>
-          <div class="meta-chip">Pronto para deploy estático</div>
         </div>
       </section>
 
@@ -266,13 +191,8 @@
 
         <form id="chatForm" class="composer" autocomplete="off">
           <label class="sr-only" for="userMessage">Digite sua mensagem</label>
-          <textarea
-            id="userMessage"
-            rows="3"
-            placeholder="Digite sua pergunta aqui..."
-            required
-            maxlength="4000"
-          ></textarea>
+          <textarea id="userMessage" rows="3" placeholder="Digite sua pergunta aqui..." required
+            maxlength="4000"></textarea>
           <div class="composer-actions">
             <p class="hint">
               `Shift + Enter` adiciona linha. `Enter` envia a mensagem.
@@ -293,4 +213,5 @@
 
   <script src="script.js"></script>
 </body>
+
 </html>
