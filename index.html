@@ -40,20 +40,6 @@
           </div>
 
           <label class="field">
-            <span>Modo de conexão</span>
-            <select id="connectionMode">
-              <option value="proxy" selected>Proxy seguro / backend</option>
-              <option value="direct">Frontend direto (somente teste)</option>
-            </select>
-          </label>
-
-          <label class="field">
-            <span>Proxy URL</span>
-            <input id="proxyUrl" type="url" placeholder="https://seu-proxy.azurewebsites.net/api/chat" inputmode="url"
-              spellcheck="false" autocomplete="off" maxlength="2048">
-          </label>
-
-          <label class="field">
             <span>Azure Endpoint</span>
             <input id="azureEndpoint" type="url" placeholder="https://seu-recurso.cognitiveservices.azure.com/"
               inputmode="url" spellcheck="false" autocomplete="off" maxlength="2048">
@@ -72,7 +58,7 @@
           </label>
 
           <p class="hint warning">
-            Hospedar chave no frontend é inseguro. Para GitHub Pages, prefira proxy seguro.
+            Hospedar chave no frontend é inseguro. Use esta versão apenas para testes.
           </p>
 
           <p class="hint warning hidden" id="directModeWarning">

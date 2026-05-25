@@ -39,8 +39,6 @@ const elements = {
   newConversation: document.getElementById("newConversation"),
   exportConversation: document.getElementById("exportConversation"),
   connectionStatus: document.getElementById("connectionStatus"),
-  connectionMode: document.getElementById("connectionMode"),
-  proxyUrl: document.getElementById("proxyUrl"),
   azureEndpoint: document.getElementById("azureEndpoint"),
   deploymentName: document.getElementById("deploymentName"),
   apiKey: document.getElementById("apiKey"),
@@ -71,8 +69,6 @@ function attachEventListeners() {
   elements.userMessage.addEventListener("keydown", handleComposerKeydown);
   elements.newConversation.addEventListener("click", resetConversation);
   elements.exportConversation.addEventListener("click", exportConversation);
-  elements.connectionMode.addEventListener("change", updateConnectionStatus);
-  elements.proxyUrl.addEventListener("input", updateConnectionStatus);
   elements.azureEndpoint.addEventListener("input", updateConnectionStatus);
   elements.deploymentName.addEventListener("input", updateConnectionStatus);
   elements.apiKey.addEventListener("input", updateConnectionStatus);
@@ -138,16 +134,7 @@ async function handleChatSubmit(event) {
 }
 
 function validateConfiguration() {
-  const mode = elements.connectionMode.value;
   sanitizeDeploymentName(elements.deploymentName.value);
-
-  if (mode === "proxy") {
-    if (!elements.proxyUrl.value.trim()) {
-      throw new Error("Informe a URL do proxy seguro.");
-    }
-    validateProxyUrl(elements.proxyUrl.value);
-    return;
-  }
 
   if (!elements.azureEndpoint.value.trim()) {
     throw new Error("Informe o Azure Endpoint para o modo direto.");
@@ -164,7 +151,6 @@ function buildRequestPayload(message) {
   const agentConfig = collectAgentConfig();
 
   return {
-    connectionMode: elements.connectionMode.value,
     message,
     deploymentName: sanitizeDeploymentName(elements.deploymentName.value),
     azureEndpoint: elements.azureEndpoint.value.trim(),
@@ -219,29 +205,7 @@ function composeInstructions(config) {
 }
 
 async function sendChatRequest(payload) {
-  if (payload.connectionMode === "proxy") {
-    return sendViaProxy(payload);
-  }
-
   return sendDirectToAzureOpenAI(payload);
-}
-
-async function sendViaProxy(payload) {
-  const response = await fetchWithTimeout(elements.proxyUrl.value.trim(), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: payload.message,
-      deploymentName: payload.deploymentName,
-      agentConfig: payload.agentConfig,
-      instructions: payload.composedInstructions,
-      history: payload.history
-    })
-  });
-
-  return parseJsonResponse(response);
 }
 
 async function sendDirectToAzureOpenAI(payload) {
@@ -406,31 +370,23 @@ function clearError() {
 }
 
 function updateConnectionStatus() {
-  const mode = elements.connectionMode.value;
   let isConfigured = false;
 
   try {
-    if (mode === "proxy") {
-      isConfigured = Boolean(
-        elements.proxyUrl.value.trim() &&
-        sanitizeDeploymentName(elements.deploymentName.value)
-      );
-    } else {
-      isConfigured = Boolean(
-        elements.azureEndpoint.value.trim() &&
-        sanitizeDeploymentName(elements.deploymentName.value) &&
-        elements.apiKey.value.trim()
-      );
-    }
+    isConfigured = Boolean(
+      elements.azureEndpoint.value.trim() &&
+      sanitizeDeploymentName(elements.deploymentName.value) &&
+      elements.apiKey.value.trim()
+    );
   } catch {
     isConfigured = false;
   }
 
   elements.connectionStatus.textContent = isConfigured ? "Pronto" : "Não configurado";
   elements.connectionStatus.classList.toggle("connected", isConfigured);
-  elements.apiKey.disabled = mode !== "direct";
-  elements.azureEndpoint.disabled = mode !== "direct";
-  toggleDirectWarning(mode === "direct");
+  elements.apiKey.disabled = false;
+  elements.azureEndpoint.disabled = false;
+  toggleDirectWarning(true);
 }
 
 function buildSafeHistory() {
@@ -487,13 +443,6 @@ function sanitizeDeploymentName(value) {
   }
 
   return sanitized;
-}
-
-function validateProxyUrl(value) {
-  const url = parseUrl(value, "URL do proxy inválida.");
-  if (!isHttpsOrLocal(url)) {
-    throw new Error("O proxy deve usar HTTPS em produção.");
-  }
 }
 
 function validateAzureEndpoint(value) {
