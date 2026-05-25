@@ -149,8 +149,6 @@ function validateConfiguration() {
     return;
   }
 
-  enforceDirectModePolicy();
-
   if (!elements.azureEndpoint.value.trim()) {
     throw new Error("Informe o Azure Endpoint para o modo direto.");
   }
@@ -409,7 +407,6 @@ function clearError() {
 
 function updateConnectionStatus() {
   const mode = elements.connectionMode.value;
-  const directModeAllowed = isDirectModeAllowed();
   let isConfigured = false;
 
   try {
@@ -420,7 +417,6 @@ function updateConnectionStatus() {
       );
     } else {
       isConfigured = Boolean(
-        directModeAllowed &&
         elements.azureEndpoint.value.trim() &&
         sanitizeDeploymentName(elements.deploymentName.value) &&
         elements.apiKey.value.trim()
@@ -432,9 +428,9 @@ function updateConnectionStatus() {
 
   elements.connectionStatus.textContent = isConfigured ? "Pronto" : "Não configurado";
   elements.connectionStatus.classList.toggle("connected", isConfigured);
-  elements.apiKey.disabled = mode !== "direct" || !directModeAllowed;
-  elements.azureEndpoint.disabled = mode !== "direct" || !directModeAllowed;
-  toggleDirectWarning(mode === "direct" && !directModeAllowed);
+  elements.apiKey.disabled = mode !== "direct";
+  elements.azureEndpoint.disabled = mode !== "direct";
+  toggleDirectWarning(mode === "direct");
 }
 
 function buildSafeHistory() {
@@ -533,22 +529,12 @@ function isHttpsOrLocal(url) {
   return url.protocol === "https:" || isLocalOrigin(url);
 }
 
-function isDirectModeAllowed() {
-  return isLocalOrigin(globalThis.location);
-}
-
 function isLocalOrigin(target) {
   return (
     target.protocol === "file:" ||
     target.hostname === "localhost" ||
     target.hostname === "127.0.0.1"
   );
-}
-
-function enforceDirectModePolicy() {
-  if (!isDirectModeAllowed()) {
-    throw new Error("O modo direto está bloqueado fora de ambiente local. Use um proxy seguro.");
-  }
 }
 
 function toggleDirectWarning(visible) {
