@@ -29,33 +29,57 @@ const state = {
   isLoading: false
 };
 
+function getElement(id) {
+  return document.getElementById(id);
+}
+
+function getRequiredElement(id) {
+  const element = getElement(id);
+  if (!element) {
+    throw new Error(`Elemento obrigatório não encontrado: ${id}`);
+  }
+
+  return element;
+}
+
 const elements = {
-  chatForm: document.getElementById("chatForm"),
-  userMessage: document.getElementById("userMessage"),
-  chatHistory: document.getElementById("chatHistory"),
-  loadingIndicator: document.getElementById("loadingIndicator"),
-  errorBanner: document.getElementById("errorBanner"),
-  sendButton: document.getElementById("sendButton"),
-  newConversation: document.getElementById("newConversation"),
-  exportConversation: document.getElementById("exportConversation"),
-  connectionStatus: document.getElementById("connectionStatus"),
-  azureEndpoint: document.getElementById("azureEndpoint"),
-  deploymentName: document.getElementById("deploymentName"),
-  apiKey: document.getElementById("apiKey"),
-  directModeWarning: document.getElementById("directModeWarning"),
-  resetAgentConfig: document.getElementById("resetAgentConfig"),
-  systemInstructions: document.getElementById("systemInstructions"),
-  responseTone: document.getElementById("responseTone"),
-  mainGoal: document.getElementById("mainGoal"),
-  behaviorRestrictions: document.getElementById("behaviorRestrictions"),
-  additionalContext: document.getElementById("additionalContext"),
-  temperature: document.getElementById("temperature"),
-  topP: document.getElementById("topP"),
-  maxCompletionTokens: document.getElementById("maxCompletionTokens"),
-  messageTemplate: document.getElementById("messageTemplate")
+  chatForm: getRequiredElement("chatForm"),
+  userMessage: getRequiredElement("userMessage"),
+  chatHistory: getRequiredElement("chatHistory"),
+  loadingIndicator: getRequiredElement("loadingIndicator"),
+  errorBanner: getRequiredElement("errorBanner"),
+  sendButton: getRequiredElement("sendButton"),
+  newConversation: getRequiredElement("newConversation"),
+  exportConversation: getRequiredElement("exportConversation"),
+  connectionStatus: getRequiredElement("connectionStatus"),
+  azureEndpoint: getRequiredElement("azureEndpoint"),
+  deploymentName: getRequiredElement("deploymentName"),
+  apiKey: getRequiredElement("apiKey"),
+  directModeWarning: getRequiredElement("directModeWarning"),
+  resetAgentConfig: getRequiredElement("resetAgentConfig"),
+  systemInstructions: getRequiredElement("systemInstructions"),
+  responseTone: getRequiredElement("responseTone"),
+  mainGoal: getRequiredElement("mainGoal"),
+  behaviorRestrictions: getRequiredElement("behaviorRestrictions"),
+  additionalContext: getRequiredElement("additionalContext"),
+  temperature: getRequiredElement("temperature"),
+  topP: getRequiredElement("topP"),
+  maxCompletionTokens: getRequiredElement("maxCompletionTokens"),
+  messageTemplate: getRequiredElement("messageTemplate")
 };
 
-initializeApp();
+try {
+  initializeApp();
+} catch (error) {
+  const message = error instanceof Error ? error.message : "Falha ao iniciar a interface.";
+  document.body.innerHTML = `
+    <main style="font-family: sans-serif; padding: 24px; max-width: 720px; margin: 0 auto;">
+      <h1>Falha ao carregar o chatbot</h1>
+      <p>${message}</p>
+      <p>Atualize a página com Ctrl+F5 para recarregar os arquivos mais recentes.</p>
+    </main>
+  `;
+}
 
 function initializeApp() {
   hydrateDefaultAgentConfig();
